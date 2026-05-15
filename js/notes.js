@@ -104,12 +104,24 @@ const renderizarNota = (id, title, text, controls, labels = [], archived = false
     document.querySelector('.container-notes').appendChild(notaHtml);
 }
 
+// Close the expanded view of a note (if open) and hide the overlay
+const closeExpandedNote = (note) => {
+    if (note.classList.contains('expandida')) {
+        note.classList.remove('expandida');
+        if (overlay) overlay.style.display = 'none';
+    }
+}
+
 // Archive the note
 const archiveNote = (id) => {
     const note = document.querySelector(`.notes .id-nota[value="${id}"]`).closest('.notes');
     const isArchived = note.getAttribute('data-archived') === 'true';
     note.setAttribute('data-archived', !isArchived);
+    const archiveButton = note.querySelector('.btn-notes-archive');
+    archiveButton.textContent = !isArchived ? 'Unarchive' : 'Arquivar';
+    closeExpandedNote(note);
     updateNoteStatus(id, { archived: !isArchived });
+    reapplyCurrentFilter();
 }
 
 // Bin
@@ -117,8 +129,11 @@ const trashNote = (id) => {
     const note = document.querySelector(`.notes .id-nota[value="${id}"]`).closest('.notes');
     const isTrashed = note.getAttribute('data-trashed') === 'true';
     note.setAttribute('data-trashed', !isTrashed);
-    note.style.display = 'none';
+    const trashButton = note.querySelector('.btn-notes-trash');
+    trashButton.textContent = !isTrashed ? 'Restore' : 'Lixeira';
+    closeExpandedNote(note);
     updateNoteStatus(id, { trashed: !isTrashed });
+    reapplyCurrentFilter();
 }
 
 // Function to change note statuses

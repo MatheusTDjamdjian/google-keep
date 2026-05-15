@@ -1,15 +1,15 @@
 // Dark mode
 function resizeNoteHeight(item){
-    grid = document.getElementsByClassName("container-notes")[0];
-    rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
-    rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-row-gap'));
-    rowSpan = Math.ceil((item.querySelector('.notes-content').getBoundingClientRect().height+rowGap)/(rowHeight+rowGap));
+    const grid = document.getElementsByClassName("container-notes")[0];
+    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-row-gap'));
+    const rowSpan = Math.ceil((item.querySelector('.notes-content').getBoundingClientRect().height+rowGap)/(rowHeight+rowGap));
     item.style.gridRowEnd = "span "+rowSpan;
 }
 
 function resizeAllNotesHeight(){
-    allItems = document.getElementsByClassName("notes");
-    for(x=0;x<allItems.length;x++){
+    const allItems = document.getElementsByClassName("notes");
+    for(let x=0;x<allItems.length;x++){
         resizeNoteHeight(allItems[x]);
     }
 }
@@ -36,7 +36,6 @@ document.querySelector('#button-menu').addEventListener('click', (event) => {
 
 // Labels
 document.addEventListener('DOMContentLoaded', function() {
-    const notesContainer = document.getElementById('notes-container');
     const dynamicLabelsContainer = document.getElementById('dynamic-labels');
 
     fetch('json/dados.json')
@@ -47,11 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             notes.forEach(note => {
                 note.labels.forEach(label => labelsSet.add(label));
-                renderizarNota(note.id, note.title, note.text, note.controls, note.labels);
             });
 
             labelsSet.forEach(label => createLabelElement(label));
-            addLabelFilterEvent();
         })
         .catch(error => console.error('Erro ao carregar o arquivo JSON:', error));
 
@@ -67,47 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         dynamicLabelsContainer.appendChild(labelElement);
     }
-
-    // Filter the labels
-    function addLabelFilterEvent() {
-        const labelButtons = document.querySelectorAll('.menu-button[data-label]');
-        labelButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const label = button.getAttribute('data-label');
-                filterNotesByLabel(label);
-            });
-        });
-        setTimeout(() => {
-            resizeAllNotesHeight();
-        }, 500);
-    }
-
-    function filterNotesByLabel(label) {
-        const notes = document.querySelectorAll('.notes');
-        notes.forEach(note => {
-            const noteLabels = note.getAttribute('data-labels').split(',');
-            if (label === 'all' || noteLabels.includes(label)) {
-                note.style.display = '';
-            } else {
-                note.style.display = 'none';
-            }
-        });
-    }
 });
 
-// File and Recycle Bin
-document.querySelector('.menu-config').addEventListener('click', (event) => {
-    const menuButton = event.target.closest('.menu-button');
-    if (!menuButton) return;
-
-    const label = menuButton.getAttribute('data-label');
-    filterNotesByLabel(label);
-    setTimeout(() => {
-        resizeAllNotesHeight();
-    }, 500);
-});
-
-// Search bar 
+// Search bar
 let currentFilterLabel = 'all';
 let currentSearchText = '';
 
@@ -115,8 +74,14 @@ document.querySelector('.menu-config').addEventListener('click', (event) => {
     const menuButton = event.target.closest('.menu-button');
     if (!menuButton) return;
 
+    document.querySelectorAll('.menu-config .menu-button').forEach(btn => btn.classList.remove('active'));
+    menuButton.classList.add('active');
+
     currentFilterLabel = menuButton.getAttribute('data-label');
     filterNotesByLabel(currentFilterLabel);
+    setTimeout(() => {
+        resizeAllNotesHeight();
+    }, 500);
 });
 
 document.getElementById('search-input').addEventListener('input', (event) => {
@@ -138,7 +103,7 @@ function filterNotesByLabel(label) {
         const title = note.querySelector('.notes-title').textContent.toLowerCase();
         const text = note.querySelector('.notes-text').textContent.toLowerCase();
         const labels = note.getAttribute('data-labels').toLowerCase();
-        
+
         const matchesSearch = title.includes(currentSearchText) || text.includes(currentSearchText) || labels.includes(currentSearchText);
 
         if (label === 'all' && !archived && !trashed && matchesSearch) {
@@ -148,27 +113,6 @@ function filterNotesByLabel(label) {
         } else if (label === 'trash' && trashed && matchesSearch) {
             note.style.display = '';
         } else if (!archived && !trashed && noteLabels.includes(label) && matchesSearch) {
-            note.style.display = '';
-        } else {
-            note.style.display = 'none';
-        }
-    });
-}
-
-// Search bar 
-document.getElementById('search-input').addEventListener('input', (event) => {
-    const searchText = event.target.value.toLowerCase();
-    filterNotesBySearch(searchText);
-});
-
-function filterNotesBySearch(searchText) {
-    const notes = document.querySelectorAll('.notes');
-    notes.forEach(note => {
-        const title = note.querySelector('.notes-title').textContent.toLowerCase();
-        const text = note.querySelector('.notes-text').textContent.toLowerCase();
-        const labels = note.getAttribute('data-labels').toLowerCase();
-        
-        if (title.includes(searchText) || text.includes(searchText) || labels.includes(searchText)) {
             note.style.display = '';
         } else {
             note.style.display = 'none';
