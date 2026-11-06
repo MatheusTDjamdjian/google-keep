@@ -302,20 +302,32 @@ button.search-bar-btn:hover {
 
 /* Notes */
 
+/* Controls show on hover over the space already reserved under the labels,
+   so the card doesn't grow and the grid doesn't reshuffle */
 .notes-controls {
-    overflow: hidden;
-    transition: height .5s;
-    margin: -4px 0px 0px 10px;
-    height: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6px;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
 }
-.controls-on {
-    height: 47px;
-}
-.controls-off {
-    height: 0;
+.notes:hover .notes-controls,
+.notes:has(:focus-visible) .notes-controls {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
 }
 .expandida .notes-controls {
-    height: auto;
+    position: static;
+    margin: -4px 0px 0px 10px;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: none;
 }
 .container-notes {
     display: grid;
@@ -326,6 +338,8 @@ button.search-bar-btn:hover {
     width: 85%;
 }
 .notes {
+    position: relative;
+    cursor: pointer;
     color: var(--text);
     break-inside: avoid;
     transition: height 0.3s ease;
@@ -334,9 +348,6 @@ button.search-bar-btn:hover {
     height: auto;
     margin: 0;
     border-radius: 5px;
-}
-.notes-expanded {
-    height: auto;
 }
 .notes-content {
     padding: 9px;
@@ -410,6 +421,18 @@ button.search-bar-btn:hover {
     max-width: 30%;
     max-height: 60%;
     z-index: 1000;
+    cursor: default;
+}
+body.dark .expandida {
+    background-color: var(--bg-color);
+    border-color: var(--bg-color);
+}
+body.dark .expandida .btn-notes-archive,
+body.dark .expandida .btn-notes-trash,
+body.dark .expandida .btn-notes-fechar,
+body.dark .expandida .note-label {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 .expandida h1 {
     font-size: 24px;
@@ -422,6 +445,11 @@ button.search-bar-btn:hover {
 
 /* Notes buttons */
 
+.btn-notes-archive,
+.btn-notes-trash,
+.btn-notes-fechar {
+    cursor: pointer;
+}
 .btn-notes-archive {
     text-decoration: none;
     color: var(--botao-notes);
@@ -462,4 +490,67 @@ button.search-bar-btn:hover {
     margin-right: 5px;
     margin-top: 5px;
     font-size: 0.85em;
+}
+
+/* Moving notes between folders */
+
+.notes.note-moving {
+    pointer-events: none;
+}
+.notes.note-moving:not(.expandida) {
+    z-index: 5;
+}
+.menu-items .menu-button.menu-bump {
+    animation: menu-bump-bg .7s ease-out;
+}
+@keyframes menu-bump-bg {
+    0%, 55% {
+        background-color: var(--bg-menu-item);
+    }
+}
+
+/* Toast */
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    max-width: calc(100% - 48px);
+    padding: 12px 12px 12px 18px;
+    border-radius: 6px;
+    background-color: #323232;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px);
+    transition: opacity .25s ease, transform .25s ease, visibility .25s;
+}
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+.toast-undo {
+    background: none;
+    color: #fbbc04;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.toast-undo:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+@media (prefers-reduced-motion: reduce) {
+    .notes-controls,
+    .toast {
+        transition: none;
+    }
 }
